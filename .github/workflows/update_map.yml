@@ -1,0 +1,25 @@
+name: Update Map Daily
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  workflow_dispatch:  # Manual trigger
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install requests gmplot
+      - name: Run update script
+        run: python frontier_map.py
+      - name: Commit changes
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add index.html michigan_coords.json michigan_results.json frontier_map.log
+          git commit -m "Daily map update" || echo "No changes"
+          git push
